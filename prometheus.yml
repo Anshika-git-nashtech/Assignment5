@@ -4,7 +4,7 @@ global:
 scrape_configs:
   - job_name: 'python-app'
     static_configs:
-      - targets: ['host.docker.internal:8000'] 
+      - targets: ['192.168.31.252:8000'] 
 
 rule_files:
   - 'alert_rules.yml'      
