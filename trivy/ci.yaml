@@ -1,0 +1,39 @@
+name: Docker Image Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://github.com/aquasecurity/trivy/releases/download/v0.24.0/trivy_0.24.0_Linux-64bit.deb -o trivy.deb
+          sudo dpkg -i trivy.deb
+
+      - name: Build Docker image
+        run: docker build -t my-image .
+
+      - name: Run Trivy Scan
+        run: |
+          trivy image my-image --severity HIGH,CRITICAL --exit-code 1
+        continue-on-error: false
+
+      - name: Deploy (if no critical vulnerabilities found)
+        if: success()
+        run: |
+          echo "Deploying application..."
+        
